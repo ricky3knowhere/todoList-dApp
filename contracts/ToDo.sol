@@ -25,6 +25,8 @@ contract ToDo {
 
     event TaskStatusToggled(uint256 id, bool done, uint256 date);
 
+    event TaskDeleted(uint256 id);
+
     constructor() public {
         lastTaskID = 0;
     }
@@ -90,6 +92,20 @@ contract ToDo {
         task.done = !task.done;
         task.dateCompleted = task.done ? block.timestamp : 0;
         emit TaskStatusToggled(id, task.done, task.dateCompleted);
+    }
+
+    function deleteTask(uint256 id) external tasksExists(id) {
+        delete tasks[id];
+        for (uint256 i = 0; i < tasksIds.length; i++) {
+            if (tasksIds[i] == id) {
+                for (uint256 j = i; j < tasksIds.length - 1; j++) {
+                    tasksIds[j] = tasksIds[j + 1];
+                }
+                tasksIds.pop();
+                return;
+            }
+        }
+        emit TaskDeleted(id);
     }
 
     modifier tasksExists(uint256 id) {

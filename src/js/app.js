@@ -85,6 +85,28 @@ App = {
       }
     });
 
+    // Delete Task
+    $("#tableBody").on("click", (e) => {
+      if ($(e.target).is("button")) {
+        const id = e.target.id;
+        console.log("id ==>> ", id);
+        App.contracts.ToDo.deployed().then((todo) =>
+          todo
+            .deleteTask(id, {
+              from: App.account,
+              gas: 1000000,
+            })
+            .then((data) => {
+              console.log("task is deleted succesfully", data);
+              window.location.href = "/";
+            })
+            .catch((err) =>
+              console.log("Oops... there was an error ==>> ", err)
+            )
+        );
+      }
+    });
+
     // Date formater
     const getDate = async (date) =>
       new Date(await date.toNumber()).toLocaleString("eng-UK", {
@@ -98,7 +120,8 @@ App = {
       .then((instance) =>
         instance.getTaskIds().then((taskIds) => {
           let promises = [];
-          taskIds.forEach((taskId) => {
+          console.log("taskIds ==>> ", taskIds);
+          taskIds.map((taskId) => {
             promises.push(instance.getTask(taskId.toNumber()));
           });
           return promises;
@@ -120,7 +143,7 @@ App = {
       x = await taskData[i];
       console.log("x ==>> ", x);
       y += `<tr>
-      <td>${await x[0]}</td>
+      <td>${i+1}</td>
       <td>${await getDate(await x[1])}</td>
       <td>${await x[2]}</td>
       <td>${await x[3]}</td>
@@ -128,6 +151,7 @@ App = {
         x[4] ? "checked" : ""
       }/></td>
       <td>${x[5].toNumber() ? await getDate(x[5]) : "~"}</td>
+      <td><button class="btn btn-primary btn-sm" id="${await x[0]}">Delete</button></td>
       </tr>`;
     }
 
